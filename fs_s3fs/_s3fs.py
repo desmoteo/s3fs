@@ -377,10 +377,14 @@ class S3FS(FS):
                     _name = _prefix[prefix_len:]
                     if _name:
                         _directory.append(_name.rstrip(self.delimiter))
-                for obj in result.get("Contents", ()):
-                    name = obj["Key"][prefix_len:]
-                    if name:
-                        _directory.append(name)
+                contents = result.get("Contents")
+                if contents:
+                    for obj in contents:
+                        name = obj["Key"][prefix_len:]
+                        if name:
+                            _directory.append(name)
+                else:
+                    raise errors.ResourceNotFound(path)
 
         if self.strict and not _directory:
             if not self.getinfo(_path).is_dir:
